@@ -39,16 +39,21 @@ export function stripBackLink(md) {
 export function readBook() {
   const readme = read('README.md');
   const lines = readme.split('\n');
+  const heading = (...names) => {
+    const index = lines.findIndex(line => names.includes(line));
+    if (index < 0) throw new Error(`README 裡找不到標題：${names.join(' / ')}`);
+    return index;
+  };
   const between = (from, to) => {
-    const a = lines.findIndex(l => l.startsWith(from));
-    const b = lines.findIndex((l, i) => i > a && l.startsWith(to));
-    if (a < 0 || b < 0) throw new Error(`README 里找不到 ${from} 到 ${to} 这一段`);
+    const a = heading(...from);
+    const b = lines.findIndex((line, index) => index > a && to.some(name => line.startsWith(name)));
+    if (b < 0) throw new Error(`README 裡找不到 ${from.join(' / ')} 到 ${to.join(' / ')} 這一段`);
     return lines.slice(a, b).join('\n');
   };
-  const description = between('# 高性价比人生指南', '[![')
+  const description = between(['# 高性价比人生指南', '# 高性價比人生指南'], ['[![在线检索]', '[![在線檢索]'])
     .split('\n').slice(1).map(l => l.replace(/<[^>]+>/g, '').trim()).filter(Boolean).join('');
-  const frontMd = between('## 这本书想回答的问题', '## 目录');
-  const contentsMd = between('## 目录', '## 正文')
+  const frontMd = between(['## 这本书想回答的问题', '## 這本書想回答的問題'], ['## 目录', '## 目錄']);
+  const contentsMd = between(['## 目录', '## 目錄'], ['## 正文'])
     .split('\n\n').filter(p => !p.includes('index.html')).join('\n\n');
   const bookFiles = unique([...contentsMd.matchAll(/\]\((book\/[^)#]+\.md)\)/g)].map(m => m[1]));
   const docFiles = unique([...readme.matchAll(/\]\((docs\/[^)#/]+\.md)\)/g)].map(m => m[1]));

@@ -1,0 +1,12 @@
+{
+  "name": "how-to-live-better",
+  "private": true,
+  "packageManager": "pnpm@11.17.0",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "dev": "pnpm --filter how-to-live-better-reader dev",
+    "build": "pnpm --filter how-to-live-better-reader build",
+    "start": "pnpm --filter how-to-live-better-reader start",
+    "data": "pnpm --filter how-to-live-better-reader data"
+  }
+}
