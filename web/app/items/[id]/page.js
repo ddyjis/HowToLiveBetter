@@ -41,7 +41,7 @@ export default async function ItemPage({ params }) {
           return safe ? new URL(safe, repository + item.origin.path).href : '';
         }}>{item[key]}</ReactMarkdown>
       </section>)}
-      <p className="sources"><a href={`${repository}${item.origin.path}#L${item.origin.startLine}`}>查看本條繁體原文</a></p>
+      <p className="sources"><a href={`${repository}${item.origin.path}#L${item.origin.startLine}`}>查看本條簡體原文</a></p>
     </article>
     <p className="status">全書第 {position + 1} 條，共 {items.length} 條</p>
     <nav className="item-navigation" aria-label="逐條閱讀">
