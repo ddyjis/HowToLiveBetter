@@ -21,10 +21,10 @@ const CHECK_ONLY = process.argv.includes('--check');
 
 // 节内的裸引用（「见第 8 条」）只在这几个栏位里找：来源栏里的「第 N 条」几乎都是
 // 法条条款号，扫进来全是误报。
-const FIELDS = /^- (说人话|收益|备注|成本)：/;
+const FIELDS = /^- (?:说人话|說人話|收益|备注|備註|成本)：/;
 // 但带节号的跨节引用（「见第 11 节第 16 条」）不会和法条混淆，来源栏里也有，一并扫。
 // book/26 第 103 条那处「日志留存见第 11 节第 16 条」就写在来源栏里，差点漏掉。
-const CROSS_FIELDS = /^- (说人话|收益|备注|成本|来源)：/;
+const CROSS_FIELDS = /^- (?:说人话|說人話|收益|备注|備註|成本|来源|來源)：/;
 
 const files = readdirSync(resolve(ROOT, 'book')).filter(f => /^\d\d-.*\.md$/.test(f)).sort();
 
@@ -91,7 +91,7 @@ for (const f of files) {
   // 取到引用后的第一个句读为止（最多 40 字）。不能用固定字符数：「见第 1 节第 7、8、
   // 14、17、18、19、23、24、29 条（血压、血糖…）」这种长条号串会把标注挤出窗口。
   const afterOf = (line, idx) => {
-    const rest = line.slice(idx).replace(/^第\s*\d+\s*节?第?\s*[\d、,\s]*\s*条/, '');
+    const rest = line.slice(idx).replace(/^第\s*\d+\s*[節节]?第?\s*[\d、,\s]*\s*[條条]/, '');
     const end = rest.search(/[。；！？]/);
     return (end === -1 ? rest : rest.slice(0, end)).slice(0, 40).replace(/\|/g, '｜');
   };
@@ -111,7 +111,7 @@ for (const f of files) {
     }
 
     // 跨节：第 N 节第 X 条
-    for (const m of line.matchAll(/第\s*(\d+)\s*节第\s*([\d、,\s]+?)\s*条/g)) {
+    for (const m of line.matchAll(/第\s*(\d+)\s*[節节]第\s*([\d、,\s]+?)\s*[條条]/g)) {
       const target = sections.get(Number(m[1]));
       for (const x of nums(m[2])) {
         const title = target?.titles.get(x);
@@ -124,8 +124,8 @@ for (const f of files) {
     // 「按第 1 条压胸」「判断方法同第 4 条」「先对照第 8 条」「和第 4 条二选一」，
     // 早先只认三种引导词，这些全漏在扫描之外。来源栏整行不扫（全是法条条款号）。
     if (!FIELDS.test(line)) return;
-    const stripped = line.replace(/第\s*\d+\s*节第\s*[\d、,\s]+?\s*条/g, '');
-    for (const m of stripped.matchAll(/第\s*([\d、,\s]+?)\s*条/g)) {
+    const stripped = line.replace(/第\s*\d+\s*[節节]第\s*[\d、,\s]+?\s*[條条]/g, '');
+    for (const m of stripped.matchAll(/第\s*([\d、,\s]+?)\s*[條条]/g)) {
       // 前面十几个字里出现法规名或文号的，是法条条款号不是条目引用，跳过
       const pre = stripped.slice(Math.max(0, m.index - 16), m.index);
       if (/法|条例|办法|规定|准则|解释|细则|号〕|〕|号，|公约|宪法/.test(pre)) continue;
